@@ -3,7 +3,7 @@ import shutil
 import time
 
 def main():
-  	print('I love you Gracie <3')
+	# print('I love you Gracie <3')
 	createFile()
 
 def createIndexFile():
@@ -11,11 +11,11 @@ def createIndexFile():
 	# Get the current location that the program is running in
 	# Program should use absolute paths to be compatible with other systems
 	cwd = os.getcwd()
-	print "CWD: %s\r\n" % (cwd)
+	print("CWD {cwd}")
 
 	# List all the files in the directory
 	files = os.listdir(".")
-	print (files)
+	print(files)
 
 def createFile():
 

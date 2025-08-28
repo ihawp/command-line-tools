@@ -2,6 +2,7 @@ import os
 import sys
 import tempfile
 import shutil
+import tkinter
 
 def checkArguments(argv):
 
@@ -78,6 +79,11 @@ def checkoverwrite(filename, writemode):
 
 
 def main():
+
+	# Requires OS version 1107, has 1106 :(
+	# I will update this laptop to the most 
+	# current verion of macOS tonight
+	window = tkinter.Tk()
 
 	# Did the caller give us any info?
 	if len(sys.argv) < 3:
