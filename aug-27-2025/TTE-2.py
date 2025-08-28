@@ -2,13 +2,14 @@ import os
 import sys
 import tempfile
 import shutil
-# import tkinter
 
 def checkArguments(argv):
 
-	if len(argv[1]) == 0 or len(argv[2]) == 0:
+	if len(argv) < 3 or 0 in (len(argv[1]), len(argv[2])):
+		print('Missing arguments.')
 		return False
 
+	# Writemode starts as 'a' (append) for safety :)
 	values = {
 		"file": argv[1],
 		"text": argv[2],
@@ -19,10 +20,11 @@ def checkArguments(argv):
 		match argv[i]:
 			case "-w":
 				values["writemode"] = argv[i + 1]
-
-	#	if argv[i] == "-w":
-	#		values["writemode"] = argv[i + 1]
-
+			case "-csvrow":
+				values["text"] = values["text"].replace(argv[i + 1], ",")
+				print('fuck yeah you found it')
+			case "-g":
+				print("even better")
 	return values
 
 def prepend(filename, text):
@@ -30,8 +32,11 @@ def prepend(filename, text):
 	# Call with flag -a p
 
 	dir_name = os.path.dirname(filename)
-
-	if not os.path.exists(dir_name):
+        
+	cwd = os.getcwd()
+	path = os.path.join(cwd, filename)
+	
+	if not os.path.exists(path):
 		print('File must exist to prepend')
 		return False
 
@@ -51,17 +56,16 @@ def writewithmode(values):
 	text = values["text"]
 	writemode = values["writemode"]
 
-	if writemode in ('r', 'R'):
-		return
-
-	# Check for writemode being submitted as p
-	if writemode in ('p', 'P'):
-		prepend(filename, text)
-		return
-
-	if checkoverwrite(filename, writemode) == False:
-		return
-
+	match writemode:
+		case "r" | "R":
+			print("This is not a book.\n")
+			return
+		case "p" | "P":
+			prepend(filename, text)
+			return
+		case "a" | "A":
+			values["text"] = "\n" + values["text"]
+	
 	# If not prepend then use the writemode submitted
 	with open(filename, writemode) as f:
 		f.write(text)
@@ -84,19 +88,11 @@ def checkoverwrite(filename, writemode):
 
 def main():
 
-	# Requires OS version 1107, has 1106 :(
-	# I will update this laptop to the most 
-	# current verion of macOS tonight
-	# window = tkinter.Tk()
-
-	# Did the caller give us any info?
-	if len(sys.argv) < 3:
-		exit()
-
 	# Get the submitted 'content'
 	values = checkArguments(sys.argv)
 
 	if values == False:
+		print("Check arguments failed.\n")
 		exit()
 
 	# Do the write/append/prepend
