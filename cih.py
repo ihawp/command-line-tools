@@ -67,7 +67,7 @@ def main():
 	if type in ('html', 'HTML'):
 		createHTMLFile()
 
-	if type in ('py', 'PY'):
+	elif type in ('py', 'PY'):
 		createPYFile()
 
 	# print('I love you Gracie <3')
