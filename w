@@ -18,7 +18,7 @@ Example:
 
 I have a local file called banana.jpg. I want to turn this image into a png called wow.png. The example below displays how to do that.
 
-python3 script.py banana.jpg wow.png png
+pig banana.jpg wow.png png
 
 NOTE: Errors will be thrown for incorrect image types submitted, ensure you know the proper extension for your desired result. This is a simple implementation of the PIL library.
 
@@ -44,7 +44,7 @@ def checkValidType(file_extension):
 
 # main() could turn into convert() and then there could be a flag -c for converting where the arguments submitted are more specific to converting, and then something where you resize the image could be under resize() expecting argv arguments in the order expected for resizing, ykwim? And then I can realize where there are patterns and simplify.
 
-def main():
+def convert():
 	if len(sys.argv) < 4 or '--help' in sys.argv:
 		printValidFormats()
 		print(help)
@@ -61,6 +61,10 @@ def main():
 
 	im = Image.open(image).convert("RGB")
 	im.save(outputname, type)
+
+def main():
+
+	print('this is the first message, haha this program does nothing.')
 
 if __name__ == '__main__':
 	main()
