@@ -1,0 +1,3 @@
+The program only checks the flag -c for the conversion value, that works, you can update it to "P" or "p" to convert PNG to PALM, for example. But it does not use the map to confirm if the value entered for the flag is correct, it should use the map.
+
+The program does not necessarilly convert to gif properly yet. I have not actually tried. But if it doesn't I think it is because the code is just wrong and I need to look into it further. Connected point, the gif (or multi-frame image) to single frame should work by default with PIL, but the flag for -f (frame) is not yet implemented, it allows the user to select a specific frame from the multi-frame image.

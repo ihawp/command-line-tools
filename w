@@ -6,21 +6,79 @@ from PIL import Image
 
 help = """
 
-Missing arguments.
+Welcome to pig (personal image generator), below you will find all the information you need to start converting your images today!
+
+#########################################
+
+Call "pig"...
+
+> pig
+
+OR
+
+> pig --help
+
+...to load this help page, maybe that is how you got here. 
+
+#########################################
 
 Arguments List:
+-----------------------------------------
 
-1. Image: Actual file in current directory.
-2. Output Name: The name of the new file to be created.
+1. Image: Actual file in current directory. 
+2. Output Name: The name of the new file to be created. 
 3. Image Type: The type of image you would like the new image to be.
+4. Flags: Infinite flags can be used, though they may not all work together!
 
-Example:
 
-I have a local file called banana.jpg. I want to turn this image into a png called wow.png. The example below displays how to do that.
+Convert a File:
+-----------------------------------------
+I have a local file called banana.jpg.
+I want to turn this image into a png called wow.png.
 
-pig banana.jpg wow.png png
+    filename   newname ext
+___|__________|_______|___|______
+pig banana.jpg wow.png png <flags>...
 
-NOTE: Errors will be thrown for incorrect image types submitted, ensure you know the proper extension for your desired result. This is a simple implementation of the PIL library.
+
+Flags:
+-----------------------------------------
+You can also add flags to your call to change specific values within the program.
+
+Convert:		-c <String>
+Select Frame:		-f <Integer>
+Types:			-t | --types <>
+Help:			-h | --help <>
+
+Examples:
+------------------------------------------
+Convert (-c):
+				convert mode
+___|__________|________|____|__|___
+pig banana.jpg wow.palm palm -c "P"
+
+Select Frame (-f):
+				frame
+___|__________|________|____|__|_
+pig banana.gif wow.jpeg jpeg -f 3
+
+If you want to convert a gif or multi-frame image to a different image type that does not support multiple frames and don't want to use the first frame, you can select a specific frame by using -f. Note that there is no call to -c, this is because the default encoding type is "RGB" so our conversion to JPEG will work.
+
+Types (-t):
+    flag
+___|_______
+pig -t
+pig --types
+
+Provides a list of the various types of images you can convert your image to.
+
+Help (-h):
+    flag
+___|_______
+pig -h
+pig --help
+
+You are viewing help, you get it.
 
 """
 
@@ -40,12 +98,10 @@ values = {
 	"convert": "RGB"
 }
 
-def printHelp():
+def printFormats():
 	print("\nA list of valid image types:\n")
 	for key in valid_formats:
 		print(key, valid_formats[key])
-
-	print(help)
 
 def checkValidType(file_extension):
 
@@ -67,19 +123,26 @@ def pathDoesntExistHere(image):
 	return False
 
 def convertFlags(argv):
-        # Convert submitted flags into usable values
-        for i in range(len(argv)):
-                match argv[i]:
-                        case '-c':
-                                # convert flag
-                                values["convert"] = argv[i + 1].upper()
+	# Convert submitted flags into usable values
+	for i in range(len(argv)):
+		match argv[i]:
+			case '-c':
+				values["convert"] = argv[i + 1].upper()
+			case '-f':
+				values["frame"] = argv[i + 1]
 
 def parseArgs(argv):
 
-	# Not enough arguments to function
-	# OR help requested
-	if len(argv) < 4 or '--help' in argv:
-		printHelp()
+	# help and types: not very clean, but needs to be general incase someone does not use any arguments (other then the flag itself)
+
+	if '--help' in argv or '-h' in argv:
+		print(help)
+
+	if '--types' in argv or '-t' in argv:
+		printFormats()
+
+	if len(argv) < 4:
+		print("Insufficient arguments, try 'pig --help'")
 		return False
 
 	# The image file submitted does not exist in the current working directory
@@ -97,16 +160,40 @@ def mapArgumentsToKeys(argv):
 	values["outputname"] = argv[2]
 	values["type"] = argv[3]
 
+def saveToGif():
+	im = Image.open(values["image"])
+	frames = [frame.convert(values["convert"]) for frame in ImageSequence.Iterator(im)]
+
+	frames[0].save(
+		values["outputname"],
+		save_all = True,
+		append_images = frames[1:],
+		duration = im.info.get("duration", 100),
+		loop = im.info.get("loop", 0)
+	)
+
+def saveFrame():
+	# save a specific frame
+	print('save a specific frame')
+
+def convertImage():
+	im = Image.open(values["image"]).convert(values["convert"])
+	im.save(values["outputname"], values["types"])
+
 def main():
 
-	parseArgs(sys.argv)
-
-	if not checkValidType(values["type"]):
-		printHelp()
+	if not parseArgs(sys.argv):
 		return
 
-	im = Image.open(values["image"]).convert(values["convert"])
-	im.save(values["outputname"], values["type"])
+	if not checkValidType(values["type"]):
+		return
+
+	# Convert multi-frame image to gif is specialist case (so far)
+	if values["type"].lower() == 'gif':
+		saveToGif()
+		return
+
+	convertImage()
 
 if __name__ == '__main__':
 	main()
