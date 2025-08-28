@@ -26,46 +26,87 @@ NOTE: Errors will be thrown for incorrect image types submitted, ensure you know
 
 valid_formats = Image.registered_extensions()
 
-def printValidFormats():
+modes = {
+        "palm": ["1", "L", "P"],
+        "gif":  ["P", "L"],
+        "ico":  ["1", "L", "P", "RGBA"],
+        "xbm":  ["1"]
+}
+
+values = {
+	"image": "",
+	"outputname": "",
+	"type": "",
+	"convert": "RGB"
+}
+
+def printHelp():
 	print("\nA list of valid image types:\n")
 	for key in valid_formats:
 		print(key, valid_formats[key])
 
+	print(help)
+
 def checkValidType(file_extension):
 
-	formatted = file_extension.lower()
+	values["type"] = file_extension.lower()
 
-	if f".{formatted}" in valid_formats:
+	if f".{values["type"]}" in valid_formats:
 		return True
-
-	printValidFormats()
 
 	return False
 
-# main() could turn into convert() and then there could be a flag -c for converting where the arguments submitted are more specific to converting, and then something where you resize the image could be under resize() expecting argv arguments in the order expected for resizing, ykwim? And then I can realize where there are patterns and simplify.
+def pathDoesntExistHere(image):
+	cwd = os.getcwd()
+	path = os.path.join(cwd, image)
 
-def convert():
-	if len(sys.argv) < 4 or '--help' in sys.argv:
-		printValidFormats()
-		print(help)
-		return
+	if not os.path.exists(path):
+		print("Path does not exist")
+		return True
 
-	image = sys.argv[1]
-	outputname = sys.argv[2]
-	type = sys.argv[3]
+	return False
 
-	if not checkValidType(type):
-		print(help)
-		print('Error: Type submitted is not possible, change argument 3 to a proper image file extension.\n')
-		return
+def convertFlags(argv):
+        # Convert submitted flags into usable values
+        for i in range(len(argv)):
+                match argv[i]:
+                        case '-c':
+                                # convert flag
+                                values["convert"] = argv[i + 1].upper()
 
-	im = Image.open(image).convert("RGB")
-	im.save(outputname, type)
+def parseArgs(argv):
+
+	# Not enough arguments to function
+	# OR help requested
+	if len(argv) < 4 or '--help' in argv:
+		printHelp()
+		return False
+
+	# The image file submitted does not exist in the current working directory
+	if pathDoesntExistHere(argv[1]):
+		print('\nFile does not exist, try --help.\n')
+		return False
+
+	# Map arguments to keys
+	mapArgumentsToKeys(argv)
+
+	convertFlags(argv)
+
+def mapArgumentsToKeys(argv):
+	values["image"] = argv[1]
+	values["outputname"] = argv[2]
+	values["type"] = argv[3]
 
 def main():
 
-	print('this is the first message, haha this program does nothing.')
+	parseArgs(sys.argv)
+
+	if not checkValidType(values["type"]):
+		printHelp()
+		return
+
+	im = Image.open(values["image"]).convert(values["convert"])
+	im.save(values["outputname"], values["type"])
 
 if __name__ == '__main__':
 	main()
-
