@@ -2,7 +2,7 @@ import os
 import sys
 import tempfile
 import shutil
-import tkinter
+# import tkinter
 
 def checkArguments(argv):
 
@@ -16,13 +16,12 @@ def checkArguments(argv):
 	}
 
 	for i in range(len(argv)):
-	#	match argv[i]:
-	#		case "-a":
-	#			values["writemode"] = argv[i + 1]
-	#			i = i + 1
+		match argv[i]:
+			case "-w":
+				values["writemode"] = argv[i + 1]
 
-		if argv[i] == "-w":
-			values["writemode"] = argv[i + 1]
+	#	if argv[i] == "-w":
+	#		values["writemode"] = argv[i + 1]
 
 	return values
 
@@ -31,8 +30,13 @@ def prepend(filename, text):
 	# Call with flag -a p
 
 	dir_name = os.path.dirname(filename)
+
+	if not os.path.exists(dir_name):
+		print('File must exist to prepend')
+		return False
+
 	fd, temp_path = tempfile.mkstemp(dir=dir_name)
-	
+
 	with os.fdopen(fd, "w") as tmp:
 		tmp.write(text)
 		
@@ -83,7 +87,7 @@ def main():
 	# Requires OS version 1107, has 1106 :(
 	# I will update this laptop to the most 
 	# current verion of macOS tonight
-	window = tkinter.Tk()
+	# window = tkinter.Tk()
 
 	# Did the caller give us any info?
 	if len(sys.argv) < 3:

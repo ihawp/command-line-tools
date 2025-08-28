@@ -3,7 +3,12 @@ import shutil
 import time
 import sys
 
-PYfile = """def main():
+PYfile = """import os
+import sys
+import shutil
+import time
+
+def main():
 	print('it works')
 
 if __name__ == '__main__':
@@ -58,27 +63,28 @@ HTMLfile = """<!doctype html>
 
 
 def main():
-	if len(sys.argv) < 1:
-		exit()
+	if len(sys.argv) < 3:
+		print('Missing arguments, use --help')
+		return
 
 	name = sys.argv[1]
 	type = sys.argv[2]
 
 	if type in ('html', 'HTML'):
-		createHTMLFile()
+		createHTMLFile(name)
 
 	elif type in ('py', 'PY'):
-		createPYFile()
+		createPYFile(name)
 
 	# print('I love you Gracie <3')
 
-def createHTMLFile():
-	with open('index.html', 'w') as f:
+def createHTMLFile(name):
+	with open(name + '.html', 'w') as f:
 		f.write(HTMLfile)
 
 
-def createPYFile():
-	with open('main.py', 'w') as f:
+def createPYFile(name):
+	with open(name + '.py', 'w') as f:
 		f.write(PYfile)
 
 
