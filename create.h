@@ -1,1 +1,0 @@
-int awesome(char cool[]);
