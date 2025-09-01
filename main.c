@@ -26,9 +26,7 @@ size_t read_bytes(FILE *file, unsigned char *buffer, size_t bufsize);
 
 int stringLength(char *input, struct Flags *fmuse) {
 	if (strlen(input) < sizeof(fmuse->filename)) {
-//		printf("\nBEFORE SETTING FILENAME: %s\n", fmuse->filename);
 		strcpy(fmuse->filename, input);
-//		printf("\nAFTER SETTING FILNAME: %s\n", fmuse->filename);
 	}
 }
 
@@ -160,7 +158,7 @@ void parseArgs(int argc, char **argv, struct Flags *fmuse) {
 		} else if (strcmp(argv[i], "-b") == 0 && i + 1 < argc) {
 
 			char filename[50];
-			strcpy(filename, argv[i + 1]);
+			strncpy(filename, argv[i + 1], sizeof(filename) - 1);
 			char *filenamepointer = filename;
 			minusB(filenamepointer);
 
