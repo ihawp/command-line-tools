@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <sys/stat.h>
 
 struct Flags {
 	char filename[50];
@@ -11,7 +12,7 @@ struct Flags {
 };
 
 int minusA();
-int minusB();
+int minusB(char *filename);
 int minusF(struct Flags *fmuse, char *great);
 size_t read_bytes(FILE *file, unsigned char *buffer, size_t bufsize);
 
@@ -25,9 +26,9 @@ size_t read_bytes(FILE *file, unsigned char *buffer, size_t bufsize);
 
 int stringLength(char *input, struct Flags *fmuse) {
 	if (strlen(input) < sizeof(fmuse->filename)) {
-		printf("\nBEFORE SETTING FILENAME: %s\n", fmuse->filename);
+//		printf("\nBEFORE SETTING FILENAME: %s\n", fmuse->filename);
 		strcpy(fmuse->filename, input);
-		printf("\nAFTER SETTING FILNAME: %s\n", fmuse->filename);
+//		printf("\nAFTER SETTING FILNAME: %s\n", fmuse->filename);
 	}
 }
 
@@ -36,11 +37,14 @@ int minusA() {
 }
 
 // DO SOME FILE OPERATIONS.
-int minusB() {
+// Pass the filename
+int minusB(char *filename) {
 
 	FILE *file;
 
-	file = fopen("awesome.txt", "r");
+	printf("%s\n", filename);
+
+	file = fopen(filename, "r");
 
 	if (file == NULL) {
 		printf("Unable to open file.\n");
@@ -61,10 +65,19 @@ int minusB() {
 	// another one
 	size_t bytesRead2 = read_bytes(file, bufferpointer2, 2000);
 
-	printf("\nFile Size: %zu\n", bytesRead);
-	printf("\nFile Size 2: %zu\n", bytesRead2);
+//	printf("\nFile Size: %zu\n", bytesRead);
+//	printf("\nFile Size 2: %zu\n", bytesRead2);
+
+	struct _stat st;
+	if (_stat("awesome.txt", &st) == 0) {
+		printf("File size: %lld bytes\n", st.st_size);
+	} else {
+		perror("stat failed");
+	}
 
 	fclose(file);
+
+	return 1;
 
 }
 
@@ -73,8 +86,8 @@ int minusF(struct Flags *fmuse, char *great) {
 
 	strcpy(fmuse->filename, "Great and so awesome");
 
-	printf("\n%s\n", fmuse->filename);
-	printf("\nGreat: %s\n", great);
+//	printf("\n%s\n", fmuse->filename);
+//	printf("\nGreat: %s\n", great);
 
 	stringLength(great, fmuse);
 
@@ -144,17 +157,18 @@ void parseArgs(int argc, char **argv, struct Flags *fmuse) {
 
 			minusA();
 
-		} else if (strcmp(argv[i], "-b") == 0) {
+		} else if (strcmp(argv[i], "-b") == 0 && i + 1 < argc) {
 
-			minusB();
+			char filename[50];
+			strcpy(filename, argv[i + 1]);
+			char *filenamepointer = filename;
+			minusB(filenamepointer);
 
 		} else if (strcmp(argv[i], "-f") == 0 && i + 1 < argc) {
 
 			minusF(fmuse, argv[i + 1]);
 
 		}
-
-		printf("\nARG-%d: %s\n", i, argv[i]);
 	}
 }
 
