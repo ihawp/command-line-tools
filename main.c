@@ -159,6 +159,7 @@ void parseArgs(int argc, char **argv, struct Flags *fmuse) {
 
 			char filename[50];
 			strncpy(filename, argv[i + 1], sizeof(filename) - 1);
+			filename[sizeof(filename) - 1] = '\0';
 			char *filenamepointer = filename;
 			minusB(filenamepointer);
 
