@@ -2,6 +2,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 struct Flags {
 	char filename[50];
@@ -9,24 +10,17 @@ struct Flags {
 	uint32_t awesome;
 };
 
+int minusA();
 int minusB();
 int minusF(struct Flags *fmuse, char *great);
+size_t read_bytes(FILE *file, unsigned char *buffer, size_t bufsize);
 
 /*
 	Flags:
 	-------------
-	-a: ass
-	-b: bass
-	-f: fass: minusF()
-*/
-
-/*
-
-	These functions have no real point.
-	But that is okay,
-	I am learning how to usefully move the
-	memory (mainly strings) around a C program!
-
+	-a: nothing
+	-b: open a file and print the result *twice?
+	-f: random stuff!
 */
 
 int stringLength(char *input, struct Flags *fmuse) {
@@ -49,34 +43,93 @@ int minusB() {
 	file = fopen("awesome.txt", "r");
 
 	if (file == NULL) {
+		printf("Unable to open file.\n");
 		return 1;
 	}
 
+	// char max size is 1024 bytes.
+	// Safer to call unsigned char because gcc compiles char as signed char, ARM makes it unsigned.
 	unsigned char buffer[16];
-	size_t bytesRead;
+	unsigned char *bufferpointer2 = malloc(2000);
+	unsigned char *bufferpointer = buffer;
 
-	while ((bytesRead = fread(buffer, 1, sizeof(buffer), file)) > 0) {
-		for (size_t i = 0; i < bytesRead; i++) {
+	// get the total bytes read from the file and print the file size
+	size_t bytesRead = read_bytes(file, bufferpointer, 16);
 
-			// %c for char, Warren, not %s.
-			printf("%c", buffer[i]);
+	fseek(file, 0, SEEK_SET);
 
-		}
-	}
+	// another one
+	size_t bytesRead2 = read_bytes(file, bufferpointer2, 2000);
+
+	printf("\nFile Size: %zu\n", bytesRead);
+	printf("\nFile Size 2: %zu\n", bytesRead2);
 
 	fclose(file);
 
-	printf("\nminus B\n");
 }
 
 // Uses pointer to struct instead of copy.
 int minusF(struct Flags *fmuse, char *great) {
+
 	strcpy(fmuse->filename, "Great and so awesome");
+
 	printf("\n%s\n", fmuse->filename);
 	printf("\nGreat: %s\n", great);
+
 	stringLength(great, fmuse);
+
 	return 0;
+
 }
+
+size_t read_bytes(FILE *file, unsigned char *buffer, size_t bufsize) {
+
+	size_t total = 0;
+
+	printf("start of read_bytes");
+
+	size_t bytesRead;
+
+	while ((bytesRead = fread(buffer, 1, sizeof(bufsize), file)) > 0) {
+		total += bytesRead;
+		for (size_t i = 0; i < bytesRead; i++) {
+			// %c for char, Warren.
+			printf("%c", buffer[i]);
+		}
+	}
+
+	printf("end of read_bytes");
+
+	return total;
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 void parseArgs(int argc, char **argv, struct Flags *fmuse) {
 
