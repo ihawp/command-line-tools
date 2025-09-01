@@ -11,32 +11,12 @@ struct Flags {
 	uint32_t awesome;
 };
 
-int minusA();
-int minusB(char *filename);
-int minusF(struct Flags *fmuse, char *great);
+int minusF(char *filename);
 size_t read_bytes(FILE *file, unsigned char *buffer, size_t bufsize);
-
-/*
-	Flags:
-	-------------
-	-a: nothing
-	-b: open a file and print the result *twice?
-	-f: random stuff!
-*/
-
-int stringLength(char *input, struct Flags *fmuse) {
-	if (strlen(input) < sizeof(fmuse->filename)) {
-		strcpy(fmuse->filename, input);
-	}
-}
-
-int minusA() {
-	printf("\nminus A\n");
-}
 
 // DO SOME FILE OPERATIONS.
 // Pass the filename
-int minusB(char *filename) {
+int minusF(char *filename) {
 
 	FILE *file;
 
@@ -76,20 +56,6 @@ int minusB(char *filename) {
 	fclose(file);
 
 	return 1;
-
-}
-
-// Uses pointer to struct instead of copy.
-int minusF(struct Flags *fmuse, char *great) {
-
-	strcpy(fmuse->filename, "Great and so awesome");
-
-//	printf("\n%s\n", fmuse->filename);
-//	printf("\nGreat: %s\n", great);
-
-	stringLength(great, fmuse);
-
-	return 0;
 
 }
 
@@ -142,6 +108,14 @@ size_t read_bytes(FILE *file, unsigned char *buffer, size_t bufsize) {
 
 
 
+
+
+/*
+	Flags:
+	-------------
+	-f: open a file and print the result *twice?
+*/
+
 void parseArgs(int argc, char **argv, struct Flags *fmuse) {
 
 	// Can also do it like this so that it is allocated on the heap.
@@ -153,19 +127,17 @@ void parseArgs(int argc, char **argv, struct Flags *fmuse) {
 
 		if (strcmp(argv[i], "-a") == 0) {
 
-			minusA();
 
-		} else if (strcmp(argv[i], "-b") == 0 && i + 1 < argc) {
+		} else if (strcmp(argv[i], "-f") == 0 && i + 1 < argc) {
 
 			char filename[50];
 			strncpy(filename, argv[i + 1], sizeof(filename) - 1);
 			filename[sizeof(filename) - 1] = '\0';
 			char *filenamepointer = filename;
-			minusB(filenamepointer);
+			minusF(filenamepointer);
 
 		} else if (strcmp(argv[i], "-f") == 0 && i + 1 < argc) {
 
-			minusF(fmuse, argv[i + 1]);
 
 		}
 	}
