@@ -10,6 +10,12 @@ void read_file_reverse(FILE *file, long n);
 void parse_arguments(int *argc, char **argv);
 long is_valid_long(char *integer);
 
+char help[] = "CLT to read a file by lines backward or forward.\n"
+              "Usage:\n"
+              "  rlr <filename> <n>\n"
+              "    n > 0 : forward from start\n"
+              "    n < 0 : backward from end\n";
+
 /*
 
 	CLT to read a file by lines backward or forward.
@@ -24,7 +30,7 @@ long is_valid_long(char *integer);
 
 	> ... the first N lines available, there does not have to be 10 available.
 
-	Let's read the last 10 lines.
+	Lets read the last 10 lines.
 
 	> rlr awesome.txt -10
 
@@ -113,6 +119,8 @@ void parse_arguments(int *argc, char **argv) {
 
 		if (strcmp(argv[i], "-a") == 0) {
 
+		} else if (strcmp(argv[i], "-h") == 0) {
+			printf(help);
 		}
 	}
 }
@@ -120,7 +128,7 @@ void parse_arguments(int *argc, char **argv) {
 int main(int argc, char **argv) {
 
 	if (argc < 3) {
-		printf("Too few arguments passed.");
+		printf(help);
 		return 1;
 	}
 
