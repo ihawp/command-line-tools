@@ -5,7 +5,8 @@
 #define MAX_FILENAME 1024
 #define MAX_LINE 1024
 
-void read_file(FILE *file, long *userLineCount);
+void read_file(FILE *file, long n);
+void read_file_reverse(FILE *file, long n);
 void parse_arguments(int *argc, char **argv);
 long is_valid_long(char *integer);
 
@@ -33,42 +34,57 @@ long is_valid_long(char *integer);
 
 	Program will automatically check for filename not being longer than 1023 characters.
 
+	Though I did not know it this morning, or maybe belive it, programs like this are
+	indeed useful beyond my manual use. A log monitoring program could use this program
+	to get the last N lines of a file, where it is meant to monitor those certain number
+	of lines and parse then print them somewhere (maybe for a human to read).
+	Cool! Thank you M.K.
+
 */
 
-void read_file_reverse(FILE *file, long *userLineCount) {
+void read_file(FILE *file, long n) {
 	char buffer[MAX_LINE];
-	long total = 0;
+
+	// error handling for reuse
+	// call for this check is made in main.
+	if (n <= 0) return;
+
+	long printed = 0;
+	fseek(file, 0, SEEK_SET);
+
+	while (printed < n && fgets(buffer, sizeof(buffer), file)) {
+		printf("%s", buffer);
+		printed++;
+	}
 }
 
-void read_file(FILE *file, long *userLineCount) {
+// Reads the last N lines starting from total-N (bottom) in forward order
+void read_file_reverse(FILE *file, long n) {
+
+	// error handling for reuse.
+	if (n >= 0) {
+		read_file(file, n);
+		return;
+	}
+
 	char buffer[MAX_LINE];
 	long total = 0;
 
 	// First pass: count total lines
-	while (fgets(buffer, sizeof(buffer), file) != NULL) total++;
+	fseek(file, 0, SEEK_SET);
+	while (fgets(buffer, sizeof(buffer), file)) total++;
 
-	long startLine = 0;
-	long linesToRead = *userLineCount;
+	long linesToRead = -n;
+	long startLine = total > linesToRead ? total - linesToRead : 0;
+	linesToRead = total - startLine; // lines available from startLine to end
 
-	if (*userLineCount < 0) {
-		// Negative N: start total + n lines from top
-		linesToRead = -*userLineCount;
-		startLine = total > linesToRead ? total - linesToRead : 0;
-		linesToRead = total - startLine;
-	} else {
-		if (*userLineCount > total) linesToRead = total;
-	}
-
-	// Rewind file to start
+	// rewind and skip lines until startLine
 	fseek(file, 0, SEEK_SET);
 	long lineCount = 0;
+	while (lineCount < startLine && fgets(buffer, sizeof(buffer), file))
+	lineCount++;
 
-	// Deal with positive.
-	while (lineCount < startLine && fgets(buffer, sizeof(buffer), file)) {
-		lineCount++;
-	}
-
-	// Deal with negative.
+	// print the next linesToRead lines
 	long printed = 0;
 	while (printed < linesToRead && fgets(buffer, sizeof(buffer), file)) {
 		printf("%s", buffer);
@@ -127,7 +143,11 @@ int main(int argc, char **argv) {
 		return 1;
 	}
 
-	read_file(file, &userLineCount);
+	if (userLineCount < 0) {
+		read_file_reverse(file, userLineCount);
+	} else {
+		read_file(file, userLineCount);
+	}
 
 	fclose(file);
 
