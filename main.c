@@ -1,155 +1,80 @@
 #include <stdio.h>
-#include <string.h>
-#include <unistd.h>
-#include <stdint.h>
 #include <stdlib.h>
-#include <sys/stat.h>
-#include <math.h>
+#include <string.h>
 
-struct Flags {
-	char filename[50];
-	char sunsetname[50];
-	uint32_t awesome;
-	void (*functionpointer)(char*);
-};
+void openFile(char *filename, int *userLineCount);
+int isInteger(char *integer);
 
-void minusF(char *filename);
-size_t read_bytes(FILE *file, unsigned char *buffer, size_t bufsize);
+// Incrementally read file
 
 /*
-*
-*
-*	minusF
-*
-*
-*
-*
+
+To incrementally read a file, you need to:
+
+1) Open the file
+
+2) Create buffer: check the file and store information about how large the first X lines are.
+
+3) Read the lines to stdout
+
+4) 
+
+?) Close the file
+
 */
 
-void minusF(char *filename) {
+void openFile(char *filename, int *userLineCount) {
 
-	FILE *file;
-	file = fopen(filename, "r");
+	FILE *file = fopen(filename, "r");
 
-	if (file == NULL) {
-		printf("Unable to open file.\n");
-		return;
-	}
+	if (!file) return;
 
-	// Safer to call unsigned char because gcc compiles char as signed char, ARM makes it unsigned.
-	unsigned char buffer[16];
-	unsigned char *bufferpointer2 = malloc(2000);
-	unsigned char *bufferpointer = buffer;
+	char buffer[50];
+	int lineCount = 0;
 
-	size_t bytesRead = read_bytes(file, bufferpointer, 16);
-	printf("\nFile Size: %zu\n", bytesRead);
-
-	struct _stat st;
-	if (_stat("awesome.txt", &st) == 0) {
-		printf("File size: %lld bytes\n", st.st_size);
-	} else {
-		perror("stat failed");
+	while (fgets(buffer, sizeof(buffer), file) != NULL && lineCount < *userLineCount) {
+		printf("%s", buffer);
+		lineCount++;
 	}
 
 	fclose(file);
+
 }
 
-/*
-*
-*
-*	read_bytes
-*
-*
-*
-*
-*/
+int isInteger(char *integer) {
+	char *endpt;
 
-size_t read_bytes(FILE *file, unsigned char *buffer, size_t bufsize) {
+	int val = (int)strtol(integer, &endpt, 10);
 
-	size_t total = 0;
-
-	size_t bytesRead;
-
-	while ((bytesRead = fread(buffer, 1, sizeof(bufsize), file)) > 0) {
-		total += bytesRead;
-		for (size_t i = 0; i < bytesRead; i++) {
-			// %c for char, Warren.
-			printf("%c", buffer[i]);
-		}
+	if (errno == ERANGE || *endpt != '\0') {
+		errno = EINVAL;
+		printf("Invalid integer\n");
+		return 0;
 	}
 
-	return total;
+	printf("converted with strtol");
+	return val;
 }
-
-/*
-*
-*
-*	read_bytes
-*
-*
-*
-*
-*/
-
-void execute() {
-	printf("executing");
-}
-
-/*
-*	Flags:
-*	-------------
-*	-f: open a file and print the result *twice?
-*
-*
-*	parseArgs
-*
-*
-*
-*
-*/
-
-void parse(int argc, char **argv, struct Flags *fmuse) {
-
-	// Can also do it like this so that it is allocated on the heap.
-	// struct FileManager *fmusepointer = malloc(sizeof(struct FileManager));
-	// You tell C that you want a struct FileManager, and then you allocate the space for that within this above pointer.
-	// Everything is on the heap,the line: struct FileManager fmuse is now redundant because we can allocate to the heap
-
-	for (int i = 0; i < argc; i++) {
-
-		if (strcmp(argv[i], "-f") == 0 && i + 1 < argc) {
-
-			char filename[50];
-			strncpy(filename, argv[i + 1], sizeof(filename) - 1);
-			filename[sizeof(filename) - 1] = '\0';
-			char *filenamepointer = filename;
-
-			fmuse->functionpointer = minusF;
-
-			fmuse->functionpointer(filename);
-
-		}
-	}
-}
-
-/*
-*
-*
-*	main
-*
-*
-*
-*
-*/
 
 int main(int argc, char **argv) {
 
-	// Initialize the struct to track the submitted flags.
-	struct Flags fmuse;
-	struct Flags *fmusepointer = &fmuse;
+	if (argc < 3) {
+		printf("Too few arguments passed.");
+		return 1;
+	}
 
-	// Parse the arguments passed in argv.
-	parse(argc, argv, fmusepointer);
+	char filename[50];
+	strcpy(filename, argv[1]);
 
-	return 0;
+	int userLineCount = isInteger(argv[2]);
+
+	if (errno == EINVAL) {
+		printf("Invalid integer for file line read-count");
+		return 1;
+	}
+
+	openFile(filename, &userLineCount);
+
+	printf("working");
+
 }
