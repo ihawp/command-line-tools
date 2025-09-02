@@ -12,9 +12,10 @@ long is_valid_long(char *integer);
 
 char help[] = "CLT to read a file by lines backward or forward.\n"
               "Usage:\n"
-              "  rlr <filename> <n>\n"
+              "  rlr <filename> <n> <flags...>\n"
               "    n > 0 : forward from start\n"
-              "    n < 0 : backward from end\n";
+              "    n < 0 : backward from end\n"
+              "    -h    : show the help menu\n";
 
 /*
 
@@ -40,10 +41,11 @@ char help[] = "CLT to read a file by lines backward or forward.\n"
 
 	Program will automatically check for filename not being longer than 1023 characters.
 
-	Though I did not know it this morning, or maybe belive it, programs like this are
-	indeed useful beyond my manual use. A log monitoring program could use this program
-	to get the last N lines of a file, where it is meant to monitor those certain number
-	of lines and parse then print them somewhere (maybe for a human to read).
+	Programs like this are indeed useful beyond my manual use. A log
+	monitoring program could use this program to get the last N lines
+	of a file, where it is meant to monitor those certain number
+	of lines and parse then print them somewhere (maybe for a human
+	to read).
 	Cool! Thank you M.K.
 
 */
@@ -98,6 +100,16 @@ void read_file_reverse(FILE *file, long n) {
 	}
 }
 
+// create struct to manage the state of the application, what errors
+// have happened and what should be printed because of that?
+// no I feel like it should all be real time, of course it is up to me!
+// And that is why we <3 C.
+
+void execute() {
+	// do all printing logic here for errors and etc.
+	// save file handling for after.
+}
+
 long is_valid_long(char *integer) {
 	errno = 0;
 
@@ -117,9 +129,7 @@ void parse_arguments(int *argc, char **argv) {
 
 	for (int i = 1; i < *argc; i++) {
 
-		if (strcmp(argv[i], "-a") == 0) {
-
-		} else if (strcmp(argv[i], "-h") == 0) {
+		if (strcmp(argv[i], "-h") == 0) {
 			printf(help);
 		}
 	}
@@ -140,16 +150,16 @@ int main(int argc, char **argv) {
 		return 1;
 	}
 
-	strncpy(filename, argv[1], sizeof(filename) - 1);
-
-	FILE *file = fopen(filename, "r");
-	if (!file) return 1;
-
 	long userLineCount = is_valid_long(argv[2]);
 	if (errno == EINVAL) {
 		fprintf(stderr, "Invalid integer.");
 		return 1;
 	}
+
+	strncpy(filename, argv[1], sizeof(filename) - 1);
+
+	FILE *file = fopen(filename, "r");
+	if (!file) return 1;
 
 	if (userLineCount < 0) {
 		read_file_reverse(file, userLineCount);
